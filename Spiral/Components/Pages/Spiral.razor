@@ -1,0 +1,178 @@
+﻿@page "/spiral"
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<PageTitle>Spiral</PageTitle>
+
+<h1>Spiral</h1>
+
+<p>Lets play a game.</p>
+
+<p>
+Start Direction 
+    <select @bind="@curDirection">
+        <option value="U" selected="@(curDirection=="U")">Up</option>
+        <option value="R" selected="@(curDirection=="R")">Right</option>
+        <option value="D" selected="@(curDirection=="D")">Down</option>
+        <option value="L" selected="@(curDirection=="L")">Left</option>
+    </select>
+</p>
+
+<p>
+Clockwise?      <input type="checkbox" @bind="@isClockwise" /> 
+</p>
+
+<p>
+Spiral End      <input type="text" @bind="@targetNumber" />
+</p>
+
+<button @onclick="LoadSpiral">
+    Generate Spiral
+</button>
+
+<style>
+    .row {
+        display:flex;
+    }
+</style>
+
+@if (string.IsNullOrWhiteSpace(curDirection) || string.IsNullOrWhiteSpace(targetNumber) || !int.TryParse(targetNumber, out outTargetNumber) || outTargetNumber <= 0 || outTargetNumber > 1000)
+{
+    <p><em>Please select a direction, and enter a number between 1 and 1000</em></p>
+}
+else
+{
+    @foreach (var yVal in cartesians.Select(obj => obj.y).Distinct().OrderByDescending(obj => obj))
+    {
+        <div style="display:flex">
+        @foreach (var col in cartesians.Where(obj => obj.y == yVal).OrderBy(obj => obj.x))
+        {
+                <div class="col">@col.value</div>
+        }
+        </div>
+    }
+}
+
+    @code {
+        private List<Cartesian> cartesians = new List<Cartesian>();
+        private string curDirection = "";
+        private bool isClockwise = false;
+        private string targetNumber = "";
+        private int outTargetNumber;
+
+        protected override async Task OnInitializedAsync()
+        {
+            LoadSpiral();
+        }
+
+        public void LoadSpiral()
+        {   
+            cartesians.Clear();
+            Cartesian lastPoint = new Cartesian(0, 0, "0");
+            Cartesian nextPoint = new Cartesian(0, 0, "0");
+            cartesians.Add(nextPoint);
+
+            //populate initial grid
+            for (int it = 1; it <= outTargetNumber; it++)
+            {
+                nextPoint = GetNextPoint(lastPoint, it.ToString());
+
+
+                if (ChangeDirection(nextPoint))
+                    curDirection = getNextDirection();
+
+                cartesians.Add(new Cartesian(nextPoint.x, nextPoint.y, nextPoint.value));
+                lastPoint = nextPoint;
+            }
+
+            //pad out grid with empty string for display purposes
+            var minX = cartesians.Min(obj => obj.x);
+            var minY = cartesians.Min(obj => obj.y);
+            var maxX = cartesians.Max(obj => obj.x);
+            var maxY = cartesians.Max(obj => obj.y);
+
+            for (int x = minX; x <= maxX; x++)
+            {
+                if (!cartesians.Exists(obj => obj.x == x && obj.y == minY))
+                    cartesians.Add(new Cartesian(x, minY, ""));
+
+                if (!cartesians.Exists(obj => obj.x == x && obj.y == maxY))
+                    cartesians.Add(new Cartesian(x, maxY, ""));
+            }
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                if (!cartesians.Exists(obj => obj.x == minX && obj.y == y))
+                    cartesians.Add(new Cartesian(minX, y, ""));
+
+                if (!cartesians.Exists(obj => obj.x == maxX && obj.y == y))
+                    cartesians.Add(new Cartesian(maxX, y, ""));
+            }
+        }
+
+    private bool ChangeDirection(Cartesian curPoint)
+    {
+        if (curDirection == "U")
+            return !cartesians.Exists(obj => obj.y >= curPoint.y);
+        else if (curDirection == "R")
+            return !cartesians.Exists(obj => obj.x >= curPoint.x);
+        else if (curDirection == "D")
+            return !cartesians.Exists(obj => obj.y <= curPoint.y);
+        else
+            return !cartesians.Exists(obj => obj.x <= curPoint.x);
+    }
+
+    private Cartesian GetNextPoint(Cartesian lastPoint, string value)
+    {
+        Cartesian nextPoint = lastPoint;
+        nextPoint.value = value;
+
+        if (curDirection == "U")
+            nextPoint.y += 1;
+        else if (curDirection == "R")
+            nextPoint.x += 1;
+        else if (curDirection == "D")
+            nextPoint.y -= 1;
+        else
+            nextPoint.x -= 1;
+
+        return nextPoint;
+    }
+
+    private string getNextDirection()
+    {
+        if (isClockwise)
+        {
+            if (curDirection == "U")
+                return "R";
+            if (curDirection == "R")
+                return "D";
+            if (curDirection == "D")
+                return "L";
+            return "U";
+        }
+        else
+        {
+            if (curDirection == "U")
+                return "L";
+            if (curDirection == "L")
+                return "D";
+            if (curDirection == "D")
+                return "R";
+            return "U";
+        }
+    }
+
+    public class Cartesian
+    {
+        public Cartesian(int _x, int _y, string _value)
+        {
+            x = _x;
+            y = _y;
+            value = _value;
+        }
+        public int x;
+        public int y;
+        public string value;
+    }
+}
