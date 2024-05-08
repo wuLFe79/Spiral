@@ -1,4 +1,3 @@
-using Spiral.Client.Pages;
 using Spiral.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,7 +28,6 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Counter).Assembly);
+    .AddInteractiveWebAssemblyRenderMode();
 
 app.Run();

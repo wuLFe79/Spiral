@@ -10,11 +10,12 @@
 
 <p>
 Start Direction 
-    <select @bind="@curDirection">
-        <option value="U" selected="@(curDirection=="U")">Up</option>
-        <option value="R" selected="@(curDirection=="R")">Right</option>
-        <option value="D" selected="@(curDirection=="D")">Down</option>
-        <option value="L" selected="@(curDirection=="L")">Left</option>
+    <select @bind="@originalUserDirection">
+        <option value="" selected>- Please Select -</option>
+        <option value="U" selected="@(originalUserDirection=="U")">Up</option>
+        <option value="R" selected="@(originalUserDirection=="R")">Right</option>
+        <option value="D" selected="@(originalUserDirection=="D")">Down</option>
+        <option value="L" selected="@(originalUserDirection=="L")">Left</option>
     </select>
 </p>
 
@@ -36,7 +37,7 @@ Spiral End Number      <input type="text" @bind="@targetNumber" />
     }
 </style>
 
-@if (string.IsNullOrWhiteSpace(curDirection) || string.IsNullOrWhiteSpace(targetNumber) || !int.TryParse(targetNumber, out outTargetNumber) || outTargetNumber <= 0 || outTargetNumber > 1000)
+@if (string.IsNullOrWhiteSpace(originalUserDirection) || string.IsNullOrWhiteSpace(targetNumber) || !int.TryParse(targetNumber, out outTargetNumber) || outTargetNumber <= 0 || outTargetNumber > 1000)
 {
     <p><em>Please select a direction, and enter a number between 1 and 1000</em></p>
 }
@@ -55,6 +56,7 @@ else
 
     @code {
         private List<Cartesian> cartesians = new List<Cartesian>();
+        private string originalUserDirection = "";
         private string curDirection = "";
         private bool isClockwise = false;
         private string targetNumber = "";
@@ -71,6 +73,7 @@ else
             Cartesian lastPoint = new Cartesian(0, 0, "0");
             Cartesian nextPoint = new Cartesian(0, 0, "0");
             cartesians.Add(nextPoint);
+            curDirection = originalUserDirection;
 
             //populate initial grid
             for (int it = 1; it <= outTargetNumber; it++)
