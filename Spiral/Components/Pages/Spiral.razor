@@ -1,4 +1,4 @@
-﻿@page "/spiral"
+﻿@page "/"
 @attribute [StreamRendering]
 @rendermode InteractiveServer
 
@@ -23,7 +23,7 @@ Clockwise?      <input type="checkbox" @bind="@isClockwise" />
 </p>
 
 <p>
-Spiral End      <input type="text" @bind="@targetNumber" />
+Spiral End Number      <input type="text" @bind="@targetNumber" />
 </p>
 
 <button @onclick="LoadSpiral">
